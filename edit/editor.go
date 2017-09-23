@@ -410,13 +410,15 @@ func (ed *Editor) ReadLine() (line string, err error) {
 
 	promptUpdater := prompt.NewUpdater(prompt.Prompt)
 	rpromptUpdater := prompt.NewUpdater(prompt.Rprompt)
+	go func() {
+		ed.reader.UnitChan() <- tty.Key{'N', ui.Ctrl}
+	}()
 
 MainLoop:
 	for {
 		promptCh := promptUpdater.Update(ed)
 		rpromptCh := rpromptUpdater.Update(ed)
 		promptTimeout := prompt.MakeMaxWaitChan(ed)
-		rpromptTimeout := prompt.MakeMaxWaitChan(ed)
 
 		select {
 		case ed.promptContent = <-promptCh:
@@ -424,13 +426,6 @@ MainLoop:
 		case <-promptTimeout:
 			logger.Println("stale prompt")
 			ed.promptContent = promptUpdater.Staled
-		}
-		select {
-		case ed.rpromptContent = <-rpromptCh:
-			logger.Println("rprompt fetched")
-		case <-rpromptTimeout:
-			logger.Println("stale rprompt")
-			ed.rpromptContent = rpromptUpdater.Staled
 		}
 
 	refresh:

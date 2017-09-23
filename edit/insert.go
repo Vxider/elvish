@@ -80,6 +80,7 @@ func init() {
 		// Controls.
 		{ui.Enter, 0}:  "smart-enter",
 		{'D', ui.Ctrl}: "return-eof",
+		{'G', ui.Ctrl}: "return-eof",
 		{ui.F2, 0}:     "toggle-quote-paste",
 
 		// Other modes.
