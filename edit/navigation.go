@@ -40,19 +40,20 @@ var Dir = ""
 
 func init() {
 	registerBindings(modeNavigation, modeNavigation, map[ui.Key]string{
-		{ui.Up, 0}:         "up",
-		{ui.Down, 0}:       "down",
-		{ui.PageUp, 0}:     "page-up",
-		{ui.PageDown, 0}:   "page-down",
-		{'P', ui.Ctrl}:     "left",
-		{'H', ui.Ctrl}:     "left",
-		{'L', ui.Ctrl}:     "right",
-		{'G', ui.Ctrl}:     "quit",
-		{'[', ui.Ctrl}:     "quit",
-		{ui.Enter, 0}:      "insert-selected-and-quit",
-		{ui.Enter, ui.Alt}: "enter-cwd",
-		{'F', ui.Ctrl}:     "trigger-shown-hidden",
-		ui.Default:         "default",
+		{ui.Up, 0}:       "up",
+		{ui.Down, 0}:     "down",
+		{ui.PageUp, 0}:   "page-up",
+		{ui.PageDown, 0}: "page-down",
+		{'P', ui.Ctrl}:   "left",
+		{'H', ui.Ctrl}:   "left",
+		{'L', ui.Ctrl}:   "right",
+		{'G', ui.Ctrl}:   "quit",
+		{'[', ui.Ctrl}:   "quit",
+		{ui.Enter, 0}:    "insert-selected-and-quit",
+		{'E', ui.Ctrl}:   "insert-selected-and-quit",
+		{'D', ui.Ctrl}:   "enter-cwd",
+		{'F', ui.Ctrl}:   "trigger-shown-hidden",
+		ui.Default:       "default",
 	})
 }
 
