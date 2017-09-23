@@ -22,6 +22,7 @@ import (
 	"github.com/elves/elvish/daemon"
 	"github.com/elves/elvish/daemon/api"
 	"github.com/elves/elvish/daemon/service"
+	"github.com/elves/elvish/edit"
 	"github.com/elves/elvish/eval"
 	"github.com/elves/elvish/eval/re"
 	"github.com/elves/elvish/shell"
@@ -156,6 +157,7 @@ func main() {
 			ret = sh.Run(args)
 		}
 	}
+	fmt.Fprintln(os.Stdout, edit.Dir)
 }
 
 const (

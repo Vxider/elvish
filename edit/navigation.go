@@ -2,12 +2,13 @@ package edit
 
 import (
 	"errors"
+	"io/ioutil"
 	"os"
 	"path"
-	"sort"
 	"strings"
 	"unicode/utf8"
 
+	"github.com/elves/elvish/edit/tty"
 	"github.com/elves/elvish/edit/ui"
 	"github.com/elves/elvish/eval"
 	"github.com/elves/elvish/parse"
@@ -30,8 +31,12 @@ var _ = registerBuiltins(modeNavigation, map[string]func(*Editor){
 	"trigger-filter":           navTriggerFilter,
 	"insert-selected":          navInsertSelected,
 	"insert-selected-and-quit": navInsertSelectedAndQuit,
+	"enter-cwd":                navEnterCWD,
+	"quit":                     quit,
 	"default":                  navDefault,
 })
+
+var Dir = ""
 
 func init() {
 	registerBindings(modeNavigation, modeNavigation, map[ui.Key]string{
@@ -39,13 +44,14 @@ func init() {
 		{ui.Down, 0}:       "down",
 		{ui.PageUp, 0}:     "page-up",
 		{ui.PageDown, 0}:   "page-down",
-		{ui.Left, 0}:       "left",
-		{ui.Right, 0}:      "right",
-		{ui.Enter, ui.Alt}: "insert-selected",
+		{'P', ui.Ctrl}:     "left",
+		{'H', ui.Ctrl}:     "left",
+		{'L', ui.Ctrl}:     "right",
+		{'G', ui.Ctrl}:     "quit",
+		{'[', ui.Ctrl}:     "quit",
 		{ui.Enter, 0}:      "insert-selected-and-quit",
-		{'H', ui.Ctrl}:     "trigger-shown-hidden",
-		{'F', ui.Ctrl}:     "trigger-filter",
-		{'[', ui.Ctrl}:     "insert:start",
+		{ui.Enter, ui.Alt}: "enter-cwd",
+		{'F', ui.Ctrl}:     "trigger-shown-hidden",
 		ui.Default:         "default",
 	})
 }
@@ -79,6 +85,7 @@ func (n *navigation) CursorOnModeLine() bool {
 func navStart(ed *Editor) {
 	initNavigation(&ed.navigation, ed)
 	ed.mode = &ed.navigation
+	navTriggerFilter(ed)
 }
 
 func navUp(ed *Editor) {
@@ -120,9 +127,28 @@ func navInsertSelected(ed *Editor) {
 	ed.insertAtDot(parse.Quote(ed.navigation.current.selectedName()) + " ")
 }
 
-func navInsertSelectedAndQuit(ed *Editor) {
-	ed.insertAtDot(parse.Quote(ed.navigation.current.selectedName()) + " ")
+func quit(ed *Editor) {
+	go func() {
+		ed.reader.UnitChan() <- tty.Key{'D', ui.Ctrl}
+	}()
+}
+
+func navEnterCWD(ed *Editor) {
 	ed.mode = &ed.insert
+	wd, _ := os.Getwd()
+	Dir = wd
+	go func() {
+		ed.reader.UnitChan() <- tty.Key{'D', ui.Ctrl}
+	}()
+}
+
+func navInsertSelectedAndQuit(ed *Editor) {
+	ed.mode = &ed.insert
+	wd, _ := os.Getwd()
+	Dir = wd + "/" + parse.Quote(ed.navigation.current.selectedName())
+	go func() {
+		ed.reader.UnitChan() <- tty.Key{'D', ui.Ctrl}
+	}()
 }
 
 func navDefault(ed *Editor) {
@@ -140,6 +166,10 @@ func navDefault(ed *Editor) {
 			n.refreshCurrent()
 			n.refreshDirPreview()
 		}
+	} else if n.filtering && k == (ui.Key{'U', ui.Ctrl}) {
+		n.filter = ""
+		n.refreshCurrent()
+		n.refreshDirPreview()
 	} else {
 		ed.CallFn(getBinding(ed.bindings[modeInsert], k))
 	}
@@ -302,22 +332,16 @@ func (n *navigation) next() {
 }
 
 func (n *navigation) loaddir(dir string) ([]ui.Styled, error) {
-	f, err := os.Open(dir)
+	files, err := ioutil.ReadDir(dir)
 	if err != nil {
 		return nil, err
 	}
-	names, err := f.Readdirnames(-1)
-	if err != nil {
-		return nil, err
-	}
-	sort.Strings(names)
-
 	var all []ui.Styled
 	lsColor := getLsColor()
-	for _, name := range names {
-		if n.showHidden || name[0] != '.' {
-			all = append(all, ui.Styled{name,
-				ui.StylesFromString(lsColor.getStyle(path.Join(dir, name)))})
+	for _, file := range files {
+		if file.IsDir() && (n.showHidden || file.Name()[0] != '.') {
+			all = append(all, ui.Styled{file.Name(),
+				ui.StylesFromString(lsColor.getStyle(path.Join(dir, file.Name())))})
 		}
 	}
 

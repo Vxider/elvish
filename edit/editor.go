@@ -353,10 +353,14 @@ func (ed *Editor) ReadLine() (line string, err error) {
 
 	callHooks(ed.evaler, ed.beforeReadLine())
 
+	go func() {
+		ed.reader.UnitChan() <- tty.Key{'N', ui.Ctrl}
+	}()
+
 MainLoop:
 	for {
 		ed.promptContent = callPrompt(ed, ed.prompt())
-		ed.rpromptContent = callPrompt(ed, ed.rprompt())
+		// ed.rpromptContent = callPrompt(ed, ed.rprompt())
 
 		err := ed.refresh(fullRefresh, true)
 		fullRefresh = false
