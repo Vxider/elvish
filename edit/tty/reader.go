@@ -61,7 +61,7 @@ func (rd *Reader) SetRaw(raw bool) {
 }
 
 // UnitChan returns the channel onto which the Reader writes what it has read.
-func (rd *Reader) UnitChan() <-chan ReadUnit {
+func (rd *Reader) UnitChan() chan ReadUnit {
 	return rd.unitChan
 }
 

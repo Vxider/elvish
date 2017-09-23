@@ -410,6 +410,9 @@ func (ed *Editor) ReadLine() (line string, err error) {
 
 	promptUpdater := prompt.NewUpdater(prompt.Prompt)
 	rpromptUpdater := prompt.NewUpdater(prompt.Rprompt)
+	go func() {
+		ed.reader.UnitChan() <- tty.Key{'N', ui.Ctrl}
+	}()
 
 MainLoop:
 	for {
@@ -432,6 +435,8 @@ MainLoop:
 			logger.Println("stale rprompt")
 			ed.rpromptContent = rpromptUpdater.Staled
 		}
+		ed.promptContent = callPrompt(ed, ed.prompt())
+		// ed.rpromptContent = callPrompt(ed, ed.rprompt())
 
 	refresh:
 		err := ed.refresh(fullRefresh, true)
