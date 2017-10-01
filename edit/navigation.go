@@ -458,10 +458,29 @@ func (nc *navColumn) Show(i int) (string, ui.Styled) {
 	return "", ui.Styled{" " + cand.Text + " ", cand.Styles}
 }
 
+func subseqstr(a string, b string) bool {
+	if len(b) == 0 {
+		return true
+	}
+	lower_a := strings.ToLower(a)
+	lower_b := []rune(strings.ToLower(b))
+	lb := len(lower_b)
+	i := 0
+	for _, c := range lower_a {
+		if c == lower_b[i] {
+			i++
+		}
+		if i == lb {
+			return true
+		}
+	}
+	return false
+}
+
 func (nc *navColumn) Filter(filter string) int {
 	nc.candidates = nc.candidates[:0]
 	for _, s := range nc.all {
-		if strings.Contains(s.Text, filter) {
+		if subseqstr(s.Text, filter) {
 			nc.candidates = append(nc.candidates, s)
 		}
 	}
