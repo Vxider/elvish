@@ -87,6 +87,7 @@ func navStart(ed *Editor) {
 	initNavigation(&ed.navigation, ed)
 	ed.mode = &ed.navigation
 	navTriggerFilter(ed)
+    navTriggerShowHidden(ed)
 }
 
 func navUp(ed *Editor) {
