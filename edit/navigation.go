@@ -2,12 +2,12 @@ package edit
 
 import (
 	"errors"
-	"io/ioutil"
 	"os"
 	"path"
 	"strings"
 	"unicode/utf8"
 
+	"github.com/elves/elvish/edit/lscolors"
 	"github.com/elves/elvish/edit/tty"
 	"github.com/elves/elvish/edit/ui"
 	"github.com/elves/elvish/eval"
@@ -87,7 +87,7 @@ func navStart(ed *Editor) {
 	initNavigation(&ed.navigation, ed)
 	ed.mode = &ed.navigation
 	navTriggerFilter(ed)
-    navTriggerShowHidden(ed)
+	navTriggerShowHidden(ed)
 }
 
 func navUp(ed *Editor) {
@@ -334,16 +334,18 @@ func (n *navigation) next() {
 }
 
 func (n *navigation) loaddir(dir string) ([]ui.Styled, error) {
-	files, err := ioutil.ReadDir(dir)
+	f, err := os.Open(dir)
 	if err != nil {
 		return nil, err
 	}
+	names, err := f.Readdirnames(-1)
+
 	var all []ui.Styled
-	lsColor := getLsColor()
-	for _, file := range files {
-		if file.IsDir() && (n.showHidden || file.Name()[0] != '.') {
-			all = append(all, ui.Styled{file.Name(),
-				ui.StylesFromString(lsColor.getStyle(path.Join(dir, file.Name())))})
+	lsColor := lscolors.GetColorist()
+	for _, name := range names {
+		if n.showHidden || name[0] != '.' {
+			all = append(all, ui.Styled{name,
+				ui.StylesFromString(lsColor.GetStyle(path.Join(dir, name)))})
 		}
 	}
 

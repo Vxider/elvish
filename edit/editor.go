@@ -419,7 +419,6 @@ MainLoop:
 		promptCh := promptUpdater.Update(ed)
 		rpromptCh := rpromptUpdater.Update(ed)
 		promptTimeout := prompt.MakeMaxWaitChan(ed)
-		rpromptTimeout := prompt.MakeMaxWaitChan(ed)
 
 		select {
 		case ed.promptContent = <-promptCh:
@@ -428,15 +427,6 @@ MainLoop:
 			logger.Println("stale prompt")
 			ed.promptContent = promptUpdater.Staled
 		}
-		select {
-		case ed.rpromptContent = <-rpromptCh:
-			logger.Println("rprompt fetched")
-		case <-rpromptTimeout:
-			logger.Println("stale rprompt")
-			ed.rpromptContent = rpromptUpdater.Staled
-		}
-		ed.promptContent = callPrompt(ed, ed.prompt())
-		// ed.rpromptContent = callPrompt(ed, ed.rprompt())
 
 	refresh:
 		err := ed.refresh(fullRefresh, true)
