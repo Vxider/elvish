@@ -6,7 +6,6 @@
 package lscolors
 
 import (
-	"os"
 	"path"
 	"strings"
 	"sync"
@@ -48,7 +47,8 @@ func GetColorist() Colorist {
 }
 
 func getLsColors() string {
-	lsColorString := os.Getenv("LS_COLORS")
+	// lsColorString := os.Getenv("LS_COLORS")
+	lsColorString := ""
 	if len(lsColorString) == 0 {
 		return defaultLsColorString
 	}
