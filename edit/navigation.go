@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 	"path"
+	"sort"
 	"strings"
 	"unicode/utf8"
 
@@ -339,7 +340,7 @@ func (n *navigation) loaddir(dir string) ([]ui.Styled, error) {
 		return nil, err
 	}
 	names, err := f.Readdirnames(-1)
-
+	sort.Strings(names)
 	var all []ui.Styled
 	lsColor := lscolors.GetColorist()
 	for _, name := range names {
