@@ -339,7 +339,13 @@ func (n *navigation) loaddir(dir string) ([]ui.Styled, error) {
 	if err != nil {
 		return nil, err
 	}
-	names, err := f.Readdirnames(-1)
+	infos, err := f.Readdir(-1)
+	var names []string
+	for _, info := range infos {
+		if info.IsDir() {
+			names = append(names, info.Name())
+		}
+	}
 	sort.Strings(names)
 	var all []ui.Styled
 	lsColor := lscolors.GetColorist()
