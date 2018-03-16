@@ -45,6 +45,8 @@ func init() {
 		{ui.Down, 0}:     "down",
 		{ui.PageUp, 0}:   "page-up",
 		{ui.PageDown, 0}: "page-down",
+		{'v', ui.Alt}:    "page-up",
+		{'V', ui.Ctrl}:   "page-down",
 		{'P', ui.Ctrl}:   "left",
 		{'H', ui.Ctrl}:   "left",
 		{'L', ui.Ctrl}:   "right",
@@ -88,7 +90,7 @@ func navStart(ed *Editor) {
 	initNavigation(&ed.navigation, ed)
 	ed.mode = &ed.navigation
 	navTriggerFilter(ed)
-	navTriggerShowHidden(ed)
+	// navTriggerShowHidden(ed)
 }
 
 func navUp(ed *Editor) {
